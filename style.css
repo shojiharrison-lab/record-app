@@ -1,0 +1,357 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, "Yu Gothic", sans-serif;
+  background: #f1eee5;
+  color: #111;
+}
+
+
+/* HERO */
+
+.hero {
+  min-height: 520px;
+
+  padding: 70px 28px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  background: #111;
+  color: #f1eee5;
+}
+
+.eyebrow {
+  margin: 0 0 28px;
+
+  font-size: 12px;
+  font-weight: bold;
+
+  letter-spacing: 4px;
+
+  color: #aaa;
+}
+
+.hero h1 {
+  margin: 0;
+
+  font-size: clamp(80px, 15vw, 190px);
+
+  font-weight: 900;
+
+  line-height: 0.75;
+
+  letter-spacing: -8px;
+}
+
+.hero-copy {
+  margin-top: 40px;
+
+  font-size: 14px;
+
+  letter-spacing: 3px;
+}
+
+
+/* MAIN */
+
+.container {
+  max-width: 1200px;
+
+  margin: 0 auto;
+
+  padding: 50px 22px 100px;
+}
+
+
+/* TOOLBAR */
+
+.toolbar {
+  display: grid;
+
+  grid-template-columns: 1fr auto;
+
+  gap: 12px;
+
+  margin-bottom: 40px;
+}
+
+#searchInput {
+  padding: 18px;
+
+  border: 2px solid #111;
+
+  background: transparent;
+
+  font-size: 16px;
+}
+
+#searchInput:focus {
+  outline: none;
+  background: white;
+}
+
+#openFormButton {
+  padding: 18px 25px;
+
+  border: none;
+
+  background: #c7ff00;
+
+  color: #111;
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+
+/* FORM */
+
+.form-section {
+  margin-bottom: 60px;
+
+  padding: 30px;
+
+  border: 2px solid #111;
+
+  background: white;
+}
+
+.hidden {
+  display: none;
+}
+
+.form-section h2 {
+  margin-top: 0;
+
+  font-size: 38px;
+}
+
+form {
+  display: grid;
+
+  gap: 18px;
+}
+
+label {
+  display: grid;
+
+  gap: 7px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+
+  letter-spacing: 1px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+
+  padding: 13px;
+
+  border: 1px solid #aaa;
+
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+
+  gap: 10px;
+}
+
+.save-button,
+.cancel-button {
+  padding: 13px 25px;
+
+  border: none;
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.save-button {
+  background: #111;
+  color: white;
+}
+
+.cancel-button {
+  background: #ddd;
+}
+
+
+/* RECORDS */
+
+.section-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-end;
+
+  margin-bottom: 20px;
+}
+
+.small-title {
+  margin: 0;
+
+  font-size: 11px;
+
+  letter-spacing: 3px;
+
+  color: #777;
+}
+
+.section-header h2 {
+  margin: 4px 0 0;
+
+  font-size: 60px;
+
+  line-height: 1;
+}
+
+#recordCount {
+  font-size: 12px;
+
+  color: #666;
+}
+
+
+/* RECORD CARD */
+
+.record-list {
+  border-top: 3px solid #111;
+}
+
+.record-card {
+  display: grid;
+
+  grid-template-columns:
+    1fr 180px 130px;
+
+  gap: 20px;
+
+  align-items: center;
+
+  padding: 28px 0;
+
+  border-bottom: 1px solid #111;
+}
+
+.record-main h3 {
+  margin: 0;
+
+  font-size: 32px;
+}
+
+.album-name {
+  margin: 4px 0;
+
+  font-size: 18px;
+
+  color: #555;
+}
+
+.memo {
+  margin-top: 12px;
+
+  color: #777;
+
+  font-size: 14px;
+}
+
+.genre {
+  font-size: 13px;
+
+  font-weight: bold;
+}
+
+.rating {
+  font-size: 20px;
+
+  letter-spacing: 2px;
+}
+
+.delete-button {
+  margin-top: 15px;
+
+  padding: 8px 12px;
+
+  border: 1px solid #111;
+
+  background: transparent;
+
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background: #111;
+  color: white;
+}
+
+
+/* EMPTY */
+
+.empty {
+  padding: 60px 0;
+
+  color: #777;
+
+  text-align: center;
+}
+
+
+/* FOOTER */
+
+footer {
+  padding: 40px;
+
+  background: #111;
+
+  color: white;
+
+  text-align: center;
+
+  font-size: 11px;
+
+  letter-spacing: 3px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .hero h1 {
+    font-size: 80px;
+    letter-spacing: -4px;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .record-card {
+    grid-template-columns: 1fr;
+
+    gap: 10px;
+  }
+
+  .section-header h2 {
+    font-size: 42px;
+  }
+
+}

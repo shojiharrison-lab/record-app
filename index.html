@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MY RECORDS</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="hero">
+    <p class="eyebrow">PERSONAL VINYL ARCHIVE</p>
+
+    <h1>
+      MY<br>
+      RECORDS
+    </h1>
+
+    <p class="hero-copy">
+      LISTEN. COLLECT. REMEMBER.
+    </p>
+  </header>
+
+
+  <main class="container">
+
+    <section class="toolbar">
+
+      <input
+        type="search"
+        id="searchInput"
+        placeholder="アーティスト・アルバムを検索"
+      >
+
+      <button id="openFormButton">
+        ＋ ADD RECORD
+      </button>
+
+    </section>
+
+
+    <section
+      id="recordFormSection"
+      class="form-section hidden"
+    >
+
+      <h2>ADD RECORD</h2>
+
+      <form id="recordForm">
+
+        <label>
+          ARTIST
+          <input
+            type="text"
+            id="artistInput"
+            required
+          >
+        </label>
+
+        <label>
+          ALBUM
+          <input
+            type="text"
+            id="albumInput"
+            required
+          >
+        </label>
+
+        <label>
+          GENRE
+          <input
+            type="text"
+            id="genreInput"
+            placeholder="Rock / Jazz / Folk ..."
+          >
+        </label>
+
+        <label>
+          RATING
+          <select id="ratingInput">
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="1">★☆☆☆☆</option>
+          </select>
+        </label>
+
+        <label>
+          MEMO
+          <textarea
+            id="memoInput"
+            rows="4"
+            placeholder="お気に入り曲、購入場所など"
+          ></textarea>
+        </label>
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="save-button"
+          >
+            SAVE
+          </button>
+
+          <button
+            type="button"
+            id="cancelButton"
+            class="cancel-button"
+          >
+            CANCEL
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <section class="records-section">
+
+      <div class="section-header">
+
+        <div>
+          <p class="small-title">COLLECTION</p>
+          <h2>RECORDS</h2>
+        </div>
+
+        <span id="recordCount">
+          0 RECORDS
+        </span>
+
+      </div>
+
+      <div
+        id="recordList"
+        class="record-list"
+      ></div>
+
+    </section>
+
+  </main>
+
+
+  <footer>
+    MY RECORDS / PERSONAL ARCHIVE
+  </footer>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
