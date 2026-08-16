@@ -12,28 +12,110 @@
 <body>
 
   <header class="hero">
-    <p class="eyebrow">PERSONAL VINYL ARCHIVE</p>
 
-    <h1>
-      MY<br>
-      RECORDS
-    </h1>
+    <div class="hero-overlay"></div>
 
-    <p class="hero-copy">
-      LISTEN. COLLECT. REMEMBER.
-    </p>
+    <div class="hero-content">
+
+      <p class="eyebrow">
+        PERSONAL VINYL ARCHIVE
+      </p>
+
+      <h1>
+        MY<br>
+        RECORDS
+      </h1>
+
+      <p class="hero-copy">
+        A QUIET PLACE FOR THE MUSIC YOU LOVE.
+      </p>
+
+    </div>
+
   </header>
 
 
   <main class="container">
 
-    <section class="toolbar">
+    <!-- SEARCH -->
+
+    <section class="top-controls">
 
       <input
         type="search"
         id="searchInput"
         placeholder="アーティスト・アルバムを検索"
       >
+
+      <select id="genreFilter">
+        <option value="ALL">
+          ALL GENRES
+        </option>
+
+        <option value="Rock">
+          Rock
+        </option>
+
+        <option value="Alternative">
+          Alternative
+        </option>
+
+        <option value="Indie Rock">
+          Indie Rock
+        </option>
+
+        <option value="Folk">
+          Folk
+        </option>
+
+        <option value="Folk Rock">
+          Folk Rock
+        </option>
+
+        <option value="Punk">
+          Punk
+        </option>
+
+        <option value="Post Punk">
+          Post Punk
+        </option>
+
+        <option value="Emo">
+          Emo
+        </option>
+
+        <option value="Shoegaze">
+          Shoegaze
+        </option>
+
+        <option value="Electronic">
+          Electronic
+        </option>
+
+        <option value="Jazz">
+          Jazz
+        </option>
+
+        <option value="Soul / R&B">
+          Soul / R&B
+        </option>
+
+        <option value="Country">
+          Country
+        </option>
+
+        <option value="Metal">
+          Metal
+        </option>
+
+        <option value="Hip Hop">
+          Hip Hop
+        </option>
+
+        <option value="Other">
+          Other
+        </option>
+      </select>
 
       <button id="openFormButton">
         ＋ ADD RECORD
@@ -42,61 +124,160 @@
     </section>
 
 
+    <!-- ADD FORM -->
+
     <section
       id="recordFormSection"
       class="form-section hidden"
     >
 
-      <h2>ADD RECORD</h2>
+      <div class="form-heading">
+
+        <div>
+
+          <p class="small-label">
+            NEW ENTRY
+          </p>
+
+          <h2>
+            ADD RECORD
+          </h2>
+
+        </div>
+
+        <button
+          type="button"
+          id="closeFormButton"
+          class="close-button"
+        >
+          ×
+        </button>
+
+      </div>
+
 
       <form id="recordForm">
 
-        <label>
-          ARTIST
-          <input
-            type="text"
-            id="artistInput"
-            required
-          >
-        </label>
+        <div class="form-grid">
 
-        <label>
-          ALBUM
-          <input
-            type="text"
-            id="albumInput"
-            required
-          >
-        </label>
+          <label>
+            ARTIST
 
-        <label>
-          GENRE
-          <input
-            type="text"
-            id="genreInput"
-            placeholder="Rock / Jazz / Folk ..."
-          >
-        </label>
+            <input
+              type="text"
+              id="artistInput"
+              required
+            >
+          </label>
 
-        <label>
-          RATING
-          <select id="ratingInput">
-            <option value="5">★★★★★</option>
-            <option value="4">★★★★☆</option>
-            <option value="3">★★★☆☆</option>
-            <option value="2">★★☆☆☆</option>
-            <option value="1">★☆☆☆☆</option>
-          </select>
-        </label>
+
+          <label>
+            ALBUM
+
+            <input
+              type="text"
+              id="albumInput"
+              required
+            >
+          </label>
+
+
+          <label>
+            GENRE
+
+            <select id="genreInput">
+              <option value="Rock">Rock</option>
+              <option value="Alternative">Alternative</option>
+              <option value="Indie Rock">Indie Rock</option>
+              <option value="Folk">Folk</option>
+              <option value="Folk Rock">Folk Rock</option>
+              <option value="Punk">Punk</option>
+              <option value="Post Punk">Post Punk</option>
+              <option value="Emo">Emo</option>
+              <option value="Shoegaze">Shoegaze</option>
+              <option value="Electronic">Electronic</option>
+              <option value="Jazz">Jazz</option>
+              <option value="Soul / R&B">Soul / R&B</option>
+              <option value="Country">Country</option>
+              <option value="Metal">Metal</option>
+              <option value="Hip Hop">Hip Hop</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+
+          <label>
+            RATING
+
+            <select id="ratingInput">
+              <option value="5">★★★★★</option>
+              <option value="4">★★★★☆</option>
+              <option value="3">★★★☆☆</option>
+              <option value="2">★★☆☆☆</option>
+              <option value="1">★☆☆☆☆</option>
+            </select>
+          </label>
+
+        </div>
+
 
         <label>
           MEMO
+
           <textarea
             id="memoInput"
             rows="4"
-            placeholder="お気に入り曲、購入場所など"
+            placeholder="お気に入り曲、購入場所、思い出など"
           ></textarea>
         </label>
+
+
+        <div class="cover-search">
+
+          <div class="cover-search-header">
+
+            <div>
+
+              <p class="small-label">
+                COVER ART
+              </p>
+
+              <h3>
+                ジャケットを検索
+              </h3>
+
+            </div>
+
+            <button
+              type="button"
+              id="searchCoverButton"
+              class="secondary-button"
+            >
+              SEARCH COVER
+            </button>
+
+          </div>
+
+
+          <p
+            id="coverStatus"
+            class="cover-status"
+          ></p>
+
+
+          <div
+            id="coverResults"
+            class="cover-results"
+          ></div>
+
+        </div>
+
+
+        <input
+          type="hidden"
+          id="coverUrlInput"
+        >
+
 
         <div class="form-actions">
 
@@ -104,7 +285,7 @@
             type="submit"
             class="save-button"
           >
-            SAVE
+            SAVE RECORD
           </button>
 
           <button
@@ -122,13 +303,22 @@
     </section>
 
 
-    <section class="records-section">
+    <!-- COLLECTION -->
 
-      <div class="section-header">
+    <section class="collection-section">
+
+      <div class="collection-header">
 
         <div>
-          <p class="small-title">COLLECTION</p>
-          <h2>RECORDS</h2>
+
+          <p class="small-label">
+            COLLECTION
+          </p>
+
+          <h2>
+            RECORDS
+          </h2>
+
         </div>
 
         <span id="recordCount">
@@ -137,9 +327,10 @@
 
       </div>
 
+
       <div
         id="recordList"
-        class="record-list"
+        class="artist-groups"
       ></div>
 
     </section>
@@ -148,7 +339,15 @@
 
 
   <footer>
-    MY RECORDS / PERSONAL ARCHIVE
+
+    <p>
+      MY RECORDS
+    </p>
+
+    <p>
+      PERSONAL VINYL ARCHIVE
+    </p>
+
   </footer>
 
 

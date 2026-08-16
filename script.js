@@ -1,8 +1,14 @@
 const searchInput =
   document.getElementById("searchInput");
 
+const genreFilter =
+  document.getElementById("genreFilter");
+
 const openFormButton =
   document.getElementById("openFormButton");
+
+const closeFormButton =
+  document.getElementById("closeFormButton");
 
 const cancelButton =
   document.getElementById("cancelButton");
@@ -28,6 +34,18 @@ const ratingInput =
 const memoInput =
   document.getElementById("memoInput");
 
+const coverUrlInput =
+  document.getElementById("coverUrlInput");
+
+const searchCoverButton =
+  document.getElementById("searchCoverButton");
+
+const coverResults =
+  document.getElementById("coverResults");
+
+const coverStatus =
+  document.getElementById("coverStatus");
+
 const recordList =
   document.getElementById("recordList");
 
@@ -35,60 +53,33 @@ const recordCount =
   document.getElementById("recordCount");
 
 
-/* ---------------------------
-   データ読み込み
---------------------------- */
+/* =========================
+   DATA
+========================= */
 
 let records =
   JSON.parse(
-    localStorage.getItem("records")
-  ) || [
-    {
-      id: 1,
-      artist: "Wilco",
-      album: "Yankee Hotel Foxtrot",
-      genre: "Alternative",
-      rating: 5,
-      memo: "何度聴いても飽きない一枚。"
-    },
-
-    {
-      id: 2,
-      artist: "Neil Young",
-      album: "Harvest",
-      genre: "Folk Rock",
-      rating: 5,
-      memo: "夜にゆっくり聴きたい。"
-    },
-
-    {
-      id: 3,
-      artist: "The Beatles",
-      album: "Abbey Road",
-      genre: "Rock",
-      rating: 5,
-      memo: "B面の流れが最高。"
-    }
-  ];
+    localStorage.getItem("records-v2")
+  ) || [];
 
 
-/* ---------------------------
-   保存
---------------------------- */
+/* =========================
+   SAVE
+========================= */
 
 function saveRecords() {
 
   localStorage.setItem(
-    "records",
+    "records-v2",
     JSON.stringify(records)
   );
 
 }
 
 
-/* ---------------------------
-   星を作る
---------------------------- */
+/* =========================
+   STAR
+========================= */
 
 function createStars(rating) {
 
@@ -100,9 +91,61 @@ function createStars(rating) {
 }
 
 
-/* ---------------------------
-   表示
---------------------------- */
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+
+/* =========================
+   GROUP BY ARTIST
+========================= */
+
+function groupByArtist(recordsArray) {
+
+  const groups = {};
+
+  recordsArray.forEach((record) => {
+
+    const key =
+      record.artist.trim();
+
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+
+    groups[key].push(record);
+
+  });
+
+
+  return Object.entries(groups)
+    .sort((a, b) =>
+      a[0].localeCompare(
+        b[0],
+        "en",
+        {
+          sensitivity: "base"
+        }
+      )
+    );
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
 
 function renderRecords() {
 
@@ -111,18 +154,30 @@ function renderRecords() {
       .trim()
       .toLowerCase();
 
+  const selectedGenre =
+    genreFilter.value;
+
 
   const filteredRecords =
     records.filter((record) => {
 
-      return (
+      const searchMatch =
         record.artist
           .toLowerCase()
           .includes(searchText)
         ||
         record.album
           .toLowerCase()
-          .includes(searchText)
+          .includes(searchText);
+
+      const genreMatch =
+        selectedGenre === "ALL"
+        ||
+        record.genre === selectedGenre;
+
+      return (
+        searchMatch &&
+        genreMatch
       );
 
     });
@@ -146,100 +201,369 @@ function renderRecords() {
   }
 
 
+  const grouped =
+    groupByArtist(
+      filteredRecords
+    );
+
+
   recordList.innerHTML =
-    filteredRecords
-      .map((record) => {
+    grouped
+      .map(([artist, artistRecords]) => {
+
+        const albums =
+          artistRecords
+            .sort((a, b) =>
+              a.album.localeCompare(
+                b.album,
+                "en",
+                {
+                  sensitivity: "base"
+                }
+              )
+            )
+            .map((record) => {
+
+              const coverHtml =
+                record.coverUrl
+                  ? `
+                    <img
+                      class="album-cover"
+                      src="${escapeHtml(record.coverUrl)}"
+                      alt="${escapeHtml(record.album)}"
+                      loading="lazy"
+                    >
+                  `
+                  : `
+                    <div
+                      class="album-cover"
+                      aria-label="ジャケット画像なし"
+                    ></div>
+                  `;
+
+
+              return `
+
+                <article class="album-card">
+
+                  ${coverHtml}
+
+                  <div class="album-info">
+
+                    <h4 class="album-title">
+                      ${escapeHtml(record.album)}
+                    </h4>
+
+                    <p class="album-meta">
+                      ${escapeHtml(record.genre)}
+                    </p>
+
+                    <div class="rating">
+                      ${createStars(record.rating)}
+                    </div>
+
+                    <p class="memo">
+                      ${escapeHtml(record.memo || "")}
+                    </p>
+
+                    <button
+                      class="delete-button"
+                      data-id="${record.id}">
+                      DELETE
+                    </button>
+
+                  </div>
+
+                </article>
+
+              `;
+
+            })
+            .join("");
+
 
         return `
 
-          <article class="record-card">
+          <section class="artist-group">
 
-            <div class="record-main">
+            <h3 class="artist-name-heading">
+              ${escapeHtml(artist)}
+            </h3>
 
-              <h3>
-                ${record.artist}
-              </h3>
-
-              <p class="album-name">
-                ${record.album}
-              </p>
-
-              <p class="memo">
-                ${record.memo || ""}
-              </p>
-
+            <div class="album-grid">
+              ${albums}
             </div>
 
-
-            <div class="genre">
-              ${record.genre || "NO GENRE"}
-            </div>
-
-
-            <div>
-
-              <div class="rating">
-                ${createStars(record.rating)}
-              </div>
-
-              <button
-                class="delete-button"
-                data-id="${record.id}">
-                DELETE
-              </button>
-
-            </div>
-
-          </article>
+          </section>
 
         `;
 
       })
-
       .join("");
 
 }
 
 
-/* ---------------------------
-   フォームを開く
---------------------------- */
+/* =========================
+   OPEN / CLOSE FORM
+========================= */
+
+function openForm() {
+
+  recordFormSection
+    .classList
+    .remove("hidden");
+
+  artistInput.focus();
+
+}
+
+
+function closeForm() {
+
+  recordFormSection
+    .classList
+    .add("hidden");
+
+  recordForm.reset();
+
+  coverUrlInput.value = "";
+
+  coverResults.innerHTML = "";
+
+  coverStatus.textContent = "";
+
+}
+
 
 openFormButton.addEventListener(
   "click",
-  function() {
-
-    recordFormSection
-      .classList
-      .remove("hidden");
-
-    artistInput.focus();
-
-  }
+  openForm
 );
 
-
-/* ---------------------------
-   キャンセル
---------------------------- */
+closeFormButton.addEventListener(
+  "click",
+  closeForm
+);
 
 cancelButton.addEventListener(
   "click",
-  function() {
+  closeForm
+);
 
-    recordFormSection
-      .classList
-      .add("hidden");
 
-    recordForm.reset();
+/* =========================
+   COVER SEARCH
+========================= */
+
+searchCoverButton.addEventListener(
+  "click",
+  searchCoverArt
+);
+
+
+async function searchCoverArt() {
+
+  const artist =
+    artistInput.value.trim();
+
+  const album =
+    albumInput.value.trim();
+
+
+  if (
+    !artist ||
+    !album
+  ) {
+
+    coverStatus.textContent =
+      "ARTIST と ALBUM を入力してください。";
+
+    return;
+  }
+
+
+  coverStatus.textContent =
+    "ジャケットを検索しています…";
+
+  coverResults.innerHTML = "";
+
+  coverUrlInput.value = "";
+
+
+  try {
+
+    const query =
+      encodeURIComponent(
+        `artist:"${artist}" AND release:"${album}"`
+      );
+
+
+    const musicBrainzUrl =
+      `https://musicbrainz.org/ws/2/release/?query=${query}&fmt=json&limit=10`;
+
+
+    const response =
+      await fetch(
+        musicBrainzUrl,
+        {
+          headers: {
+            "Accept":
+              "application/json"
+          }
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "MusicBrainz search failed"
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const releases =
+      data.releases || [];
+
+
+    if (
+      releases.length === 0
+    ) {
+
+      coverStatus.textContent =
+        "候補が見つかりませんでした。";
+
+      return;
+    }
+
+
+    const coverCandidates =
+      [];
+
+
+    for (
+      const release of releases
+    ) {
+
+      const releaseId =
+        release.id;
+
+      const coverUrl =
+        `https://coverartarchive.org/release/${releaseId}/front-500`;
+
+
+      coverCandidates.push({
+        title:
+          release.title,
+        releaseId,
+        coverUrl
+      });
+
+    }
+
+
+    coverStatus.textContent =
+      "ジャケットを選択してください。";
+
+
+    coverResults.innerHTML =
+      coverCandidates
+
+        .map((item) => {
+
+          return `
+
+            <button
+              type="button"
+              class="cover-option"
+              data-url="${escapeHtml(item.coverUrl)}"
+              title="${escapeHtml(item.title)}"
+            >
+
+              <img
+                src="${escapeHtml(item.coverUrl)}"
+                alt="${escapeHtml(item.title)}"
+                loading="lazy"
+                onerror="this.parentElement.style.display='none'"
+              >
+
+            </button>
+
+          `;
+
+        })
+        .join("");
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    coverStatus.textContent =
+      "ジャケット検索に失敗しました。";
+
+  }
+
+}
+
+
+/* =========================
+   SELECT COVER
+========================= */
+
+coverResults.addEventListener(
+  "click",
+  function(event) {
+
+    const button =
+      event.target.closest(
+        ".cover-option"
+      );
+
+
+    if (!button) {
+      return;
+    }
+
+
+    document
+      .querySelectorAll(
+        ".cover-option"
+      )
+      .forEach((item) => {
+
+        item.classList.remove(
+          "selected"
+        );
+
+      });
+
+
+    button.classList.add(
+      "selected"
+    );
+
+
+    coverUrlInput.value =
+      button.dataset.url;
+
+
+    coverStatus.textContent =
+      "このジャケットを使用します。";
 
   }
 );
 
 
-/* ---------------------------
-   レコード追加
---------------------------- */
+/* =========================
+   ADD RECORD
+========================= */
 
 recordForm.addEventListener(
   "submit",
@@ -250,7 +574,8 @@ recordForm.addEventListener(
 
     const newRecord = {
 
-      id: Date.now(),
+      id:
+        Date.now(),
 
       artist:
         artistInput.value.trim(),
@@ -259,18 +584,25 @@ recordForm.addEventListener(
         albumInput.value.trim(),
 
       genre:
-        genreInput.value.trim(),
+        genreInput.value,
 
       rating:
-        Number(ratingInput.value),
+        Number(
+          ratingInput.value
+        ),
 
       memo:
-        memoInput.value.trim()
+        memoInput.value.trim(),
+
+      coverUrl:
+        coverUrlInput.value
 
     };
 
 
-    records.unshift(newRecord);
+    records.push(
+      newRecord
+    );
 
 
     saveRecords();
@@ -279,37 +611,34 @@ recordForm.addEventListener(
     renderRecords();
 
 
-    recordForm.reset();
-
-
-    recordFormSection
-      .classList
-      .add("hidden");
+    closeForm();
 
   }
 );
 
 
-/* ---------------------------
-   削除
---------------------------- */
+/* =========================
+   DELETE
+========================= */
 
 recordList.addEventListener(
   "click",
   function(event) {
 
-    if (
-      !event.target
-        .classList
-        .contains("delete-button")
-    ) {
+    const button =
+      event.target.closest(
+        ".delete-button"
+      );
+
+
+    if (!button) {
       return;
     }
 
 
     const id =
       Number(
-        event.target.dataset.id
+        button.dataset.id
       );
 
 
@@ -329,9 +658,9 @@ recordList.addEventListener(
 );
 
 
-/* ---------------------------
-   検索
---------------------------- */
+/* =========================
+   FILTERS
+========================= */
 
 searchInput.addEventListener(
   "input",
@@ -339,8 +668,14 @@ searchInput.addEventListener(
 );
 
 
-/* ---------------------------
-   初期表示
---------------------------- */
+genreFilter.addEventListener(
+  "change",
+  renderRecords
+);
+
+
+/* =========================
+   START
+========================= */
 
 renderRecords();
