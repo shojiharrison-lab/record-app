@@ -46,11 +46,29 @@ const coverResults =
 const coverStatus =
   document.getElementById("coverStatus");
 
+const currentCoverText =
+  document.getElementById("currentCoverText");
+
 const recordList =
   document.getElementById("recordList");
 
 const recordCount =
   document.getElementById("recordCount");
+
+const alphabetNav =
+  document.getElementById("alphabetNav");
+
+const showAllButton =
+  document.getElementById("showAllButton");
+
+const formModeLabel =
+  document.getElementById("formModeLabel");
+
+const formTitle =
+  document.getElementById("formTitle");
+
+const saveButton =
+  document.getElementById("saveButton");
 
 
 /* =========================
@@ -61,6 +79,18 @@ let records =
   JSON.parse(
     localStorage.getItem("records-v2")
   ) || [];
+
+
+let selectedLetter =
+  "ALL";
+
+
+/*
+  null = 新規登録
+  数字 = 編集中のrecord id
+*/
+let editingRecordId =
+  null;
 
 
 /* =========================
@@ -78,7 +108,7 @@ function saveRecords() {
 
 
 /* =========================
-   STAR
+   HELPERS
 ========================= */
 
 function createStars(rating) {
@@ -90,10 +120,6 @@ function createStars(rating) {
 
 }
 
-
-/* =========================
-   ESCAPE HTML
-========================= */
 
 function escapeHtml(value) {
 
@@ -107,22 +133,62 @@ function escapeHtml(value) {
 }
 
 
+function normalizeArtistName(name) {
+
+  return name
+    .trim()
+    .replace(/^the\s+/i, "");
+
+}
+
+
+function getArtistLetter(name) {
+
+  const normalized =
+    normalizeArtistName(name);
+
+  const first =
+    normalized
+      .charAt(0)
+      .toUpperCase();
+
+
+  if (
+    first >= "A" &&
+    first <= "Z"
+  ) {
+
+    return first;
+
+  }
+
+
+  return "#";
+
+}
+
+
 /* =========================
-   GROUP BY ARTIST
+   GROUP
 ========================= */
 
 function groupByArtist(recordsArray) {
 
   const groups = {};
 
+
   recordsArray.forEach((record) => {
 
     const key =
       record.artist.trim();
 
+
     if (!groups[key]) {
+
       groups[key] = [];
+
     }
+
 
     groups[key].push(record);
 
@@ -130,15 +196,92 @@ function groupByArtist(recordsArray) {
 
 
   return Object.entries(groups)
-    .sort((a, b) =>
-      a[0].localeCompare(
-        b[0],
-        "en",
-        {
-          sensitivity: "base"
-        }
-      )
-    );
+    .sort((a, b) => {
+
+      return normalizeArtistName(a[0])
+        .localeCompare(
+          normalizeArtistName(b[0]),
+          "en",
+          {
+            sensitivity: "base"
+          }
+        );
+
+    });
+
+}
+
+
+/* =========================
+   A-Z
+========================= */
+
+function getAvailableLetters() {
+
+  return new Set(
+
+    records.map((record) => {
+
+      return getArtistLetter(
+        record.artist
+      );
+
+    })
+
+  );
+
+}
+
+
+function renderAlphabet() {
+
+  const letters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      .split("");
+
+
+  const available =
+    getAvailableLetters();
+
+
+  alphabetNav.innerHTML =
+    letters
+      .map((letter) => {
+
+        const isAvailable =
+          available.has(letter);
+
+
+        const activeClass =
+          selectedLetter === letter
+            ? "active"
+            : "";
+
+
+        const disabledClass =
+          !isAvailable
+            ? "disabled"
+            : "";
+
+
+        return `
+
+          <button
+            class="
+              alphabet-button
+              ${activeClass}
+              ${disabledClass}
+            "
+            data-letter="${letter}"
+            ${!isAvailable ? "disabled" : ""}
+          >
+            ${letter}
+          </button>
+
+        `;
+
+      })
+      .join("");
 
 }
 
@@ -154,12 +297,14 @@ function renderRecords() {
       .trim()
       .toLowerCase();
 
+
   const selectedGenre =
     genreFilter.value;
 
 
   const filteredRecords =
     records.filter((record) => {
+
 
       const searchMatch =
         record.artist
@@ -170,14 +315,25 @@ function renderRecords() {
           .toLowerCase()
           .includes(searchText);
 
+
       const genreMatch =
         selectedGenre === "ALL"
         ||
         record.genre === selectedGenre;
 
+
+      const letterMatch =
+        selectedLetter === "ALL"
+        ||
+        getArtistLetter(
+          record.artist
+        ) === selectedLetter;
+
+
       return (
         searchMatch &&
-        genreMatch
+        genreMatch &&
+        letterMatch
       );
 
     });
@@ -192,12 +348,18 @@ function renderRecords() {
   ) {
 
     recordList.innerHTML = `
+
       <div class="empty">
         レコードが見つかりません。
       </div>
+
     `;
 
+
+    renderAlphabet();
+
     return;
+
   }
 
 
@@ -209,112 +371,318 @@ function renderRecords() {
 
   recordList.innerHTML =
     grouped
-      .map(([artist, artistRecords]) => {
 
-        const albums =
-          artistRecords
-            .sort((a, b) =>
-              a.album.localeCompare(
-                b.album,
-                "en",
-                {
-                  sensitivity: "base"
-                }
-              )
-            )
-            .map((record) => {
-
-              const coverHtml =
-                record.coverUrl
-                  ? `
-                    <img
-                      class="album-cover"
-                      src="${escapeHtml(record.coverUrl)}"
-                      alt="${escapeHtml(record.album)}"
-                      loading="lazy"
-                    >
-                  `
-                  : `
-                    <div
-                      class="album-cover"
-                      aria-label="ジャケット画像なし"
-                    ></div>
-                  `;
+      .map(
+        ([artist, artistRecords]) => {
 
 
-              return `
+          const albums =
+            artistRecords
 
-                <article class="album-card">
+              .sort((a, b) => {
 
-                  ${coverHtml}
+                return a.album
+                  .localeCompare(
+                    b.album,
+                    "en",
+                    {
+                      sensitivity: "base"
+                    }
+                  );
 
-                  <div class="album-info">
+              })
 
-                    <h4 class="album-title">
-                      ${escapeHtml(record.album)}
-                    </h4>
+              .map((record) => {
 
-                    <p class="album-meta">
-                      ${escapeHtml(record.genre)}
-                    </p>
 
-                    <div class="rating">
-                      ${createStars(record.rating)}
+                const coverHtml =
+                  record.coverUrl
+
+                    ? `
+
+                      <img
+                        class="album-cover"
+                        src="${escapeHtml(record.coverUrl)}"
+                        alt="${escapeHtml(record.album)}"
+                        loading="lazy"
+                      >
+
+                    `
+
+                    : `
+
+                      <div
+                        class="album-cover"
+                        aria-label="ジャケット画像なし"
+                      ></div>
+
+                    `;
+
+
+                return `
+
+                  <article class="album-card">
+
+                    <div class="cover-wrapper">
+
+                      ${coverHtml}
+
                     </div>
 
-                    <p class="memo">
-                      ${escapeHtml(record.memo || "")}
-                    </p>
 
-                    <button
-                      class="delete-button"
-                      data-id="${record.id}">
-                      DELETE
-                    </button>
+                    <div class="album-info">
 
-                  </div>
+                      <h4 class="album-title">
 
-                </article>
+                        ${escapeHtml(record.album)}
 
-              `;
-
-            })
-            .join("");
+                      </h4>
 
 
-        return `
+                      <p class="album-meta">
 
-          <section class="artist-group">
+                        ${escapeHtml(record.genre)}
 
-            <h3 class="artist-name-heading">
-              ${escapeHtml(artist)}
-            </h3>
+                      </p>
 
-            <div class="album-grid">
-              ${albums}
-            </div>
 
-          </section>
+                      <div class="rating">
 
-        `;
+                        ${createStars(record.rating)}
 
-      })
+                      </div>
+
+
+                      <p class="memo">
+
+                        ${escapeHtml(record.memo || "")}
+
+                      </p>
+
+
+                      <button
+                        class="edit-button"
+                        data-id="${record.id}"
+                      >
+                        EDIT
+                      </button>
+
+
+                      <button
+                        class="delete-button"
+                        data-id="${record.id}"
+                      >
+                        DELETE
+                      </button>
+
+                    </div>
+
+                  </article>
+
+                `;
+
+              })
+              .join("");
+
+
+          return `
+
+            <section class="artist-group">
+
+              <div class="artist-heading-row">
+
+                <h3 class="artist-name-heading">
+
+                  ${escapeHtml(artist)}
+
+                </h3>
+
+
+                <span class="artist-record-count">
+
+                  ${artistRecords.length}
+
+                  ${
+                    artistRecords.length === 1
+                      ? "RECORD"
+                      : "RECORDS"
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div class="album-grid">
+
+                ${albums}
+
+              </div>
+
+            </section>
+
+          `;
+
+        }
+      )
       .join("");
+
+
+  renderAlphabet();
 
 }
 
 
 /* =========================
-   OPEN / CLOSE FORM
+   FORM MODE
 ========================= */
 
-function openForm() {
+function setAddMode() {
+
+  editingRecordId =
+    null;
+
+
+  formModeLabel.textContent =
+    "NEW ENTRY";
+
+
+  formTitle.textContent =
+    "ADD RECORD";
+
+
+  saveButton.textContent =
+    "SAVE RECORD";
+
+
+  currentCoverText.textContent =
+    "";
+
+}
+
+
+function setEditMode(record) {
+
+  editingRecordId =
+    record.id;
+
+
+  formModeLabel.textContent =
+    "EDIT ENTRY";
+
+
+  formTitle.textContent =
+    "EDIT RECORD";
+
+
+  saveButton.textContent =
+    "SAVE CHANGES";
+
+
+  artistInput.value =
+    record.artist;
+
+
+  albumInput.value =
+    record.album;
+
+
+  genreInput.value =
+    record.genre;
+
+
+  ratingInput.value =
+    String(record.rating);
+
+
+  memoInput.value =
+    record.memo || "";
+
+
+  coverUrlInput.value =
+    record.coverUrl || "";
+
+
+  if (record.coverUrl) {
+
+    currentCoverText.textContent =
+      "現在のジャケットを使用中。SEARCH COVERで変更できます。";
+
+  } else {
+
+    currentCoverText.textContent =
+      "現在ジャケット画像はありません。";
+
+  }
+
+}
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openAddForm() {
+
+  recordForm.reset();
+
+
+  coverUrlInput.value =
+    "";
+
+
+  coverResults.innerHTML =
+    "";
+
+
+  coverStatus.textContent =
+    "";
+
+
+  setAddMode();
+
 
   recordFormSection
     .classList
     .remove("hidden");
 
+
   artistInput.focus();
+
+
+  recordFormSection
+    .scrollIntoView({
+      behavior: "smooth"
+    });
+
+}
+
+
+function openEditForm(record) {
+
+  recordForm.reset();
+
+
+  coverResults.innerHTML =
+    "";
+
+
+  coverStatus.textContent =
+    "";
+
+
+  setEditMode(record);
+
+
+  recordFormSection
+    .classList
+    .remove("hidden");
+
+
+  recordFormSection
+    .scrollIntoView({
+      behavior: "smooth"
+    });
 
 }
 
@@ -325,26 +693,42 @@ function closeForm() {
     .classList
     .add("hidden");
 
+
   recordForm.reset();
 
-  coverUrlInput.value = "";
 
-  coverResults.innerHTML = "";
+  coverUrlInput.value =
+    "";
 
-  coverStatus.textContent = "";
+
+  coverResults.innerHTML =
+    "";
+
+
+  coverStatus.textContent =
+    "";
+
+
+  currentCoverText.textContent =
+    "";
+
+
+  setAddMode();
 
 }
 
 
 openFormButton.addEventListener(
   "click",
-  openForm
+  openAddForm
 );
+
 
 closeFormButton.addEventListener(
   "click",
   closeForm
 );
+
 
 cancelButton.addEventListener(
   "click",
@@ -367,6 +751,7 @@ async function searchCoverArt() {
   const artist =
     artistInput.value.trim();
 
+
   const album =
     albumInput.value.trim();
 
@@ -380,26 +765,30 @@ async function searchCoverArt() {
       "ARTIST と ALBUM を入力してください。";
 
     return;
+
   }
 
 
   coverStatus.textContent =
     "ジャケットを検索しています…";
 
-  coverResults.innerHTML = "";
 
-  coverUrlInput.value = "";
+  coverResults.innerHTML =
+    "";
 
 
   try {
 
     const query =
       encodeURIComponent(
+
         `artist:"${artist}" AND release:"${album}"`
+
       );
 
 
     const musicBrainzUrl =
+
       `https://musicbrainz.org/ws/2/release/?query=${query}&fmt=json&limit=10`;
 
 
@@ -408,8 +797,10 @@ async function searchCoverArt() {
         musicBrainzUrl,
         {
           headers: {
-            "Accept":
+
+            Accept:
               "application/json"
+
           }
         }
       );
@@ -440,32 +831,24 @@ async function searchCoverArt() {
         "候補が見つかりませんでした。";
 
       return;
+
     }
 
 
     const coverCandidates =
-      [];
+      releases.map((release) => {
 
+        return {
 
-    for (
-      const release of releases
-    ) {
+          title:
+            release.title,
 
-      const releaseId =
-        release.id;
+          coverUrl:
+            `https://coverartarchive.org/release/${release.id}/front-500`
 
-      const coverUrl =
-        `https://coverartarchive.org/release/${releaseId}/front-500`;
+        };
 
-
-      coverCandidates.push({
-        title:
-          release.title,
-        releaseId,
-        coverUrl
       });
-
-    }
 
 
     coverStatus.textContent =
@@ -490,7 +873,9 @@ async function searchCoverArt() {
                 src="${escapeHtml(item.coverUrl)}"
                 alt="${escapeHtml(item.title)}"
                 loading="lazy"
-                onerror="this.parentElement.style.display='none'"
+                onerror="
+                  this.parentElement.style.display='none'
+                "
               >
 
             </button>
@@ -504,6 +889,7 @@ async function searchCoverArt() {
   } catch (error) {
 
     console.error(error);
+
 
     coverStatus.textContent =
       "ジャケット検索に失敗しました。";
@@ -521,6 +907,7 @@ coverResults.addEventListener(
   "click",
   function(event) {
 
+
     const button =
       event.target.closest(
         ".cover-option"
@@ -528,7 +915,9 @@ coverResults.addEventListener(
 
 
     if (!button) {
+
       return;
+
     }
 
 
@@ -557,12 +946,16 @@ coverResults.addEventListener(
     coverStatus.textContent =
       "このジャケットを使用します。";
 
+
+    currentCoverText.textContent =
+      "";
+
   }
 );
 
 
 /* =========================
-   ADD RECORD
+   SAVE / UPDATE
 ========================= */
 
 recordForm.addEventListener(
@@ -572,10 +965,7 @@ recordForm.addEventListener(
     event.preventDefault();
 
 
-    const newRecord = {
-
-      id:
-        Date.now(),
+    const recordData = {
 
       artist:
         artistInput.value.trim(),
@@ -600,12 +990,63 @@ recordForm.addEventListener(
     };
 
 
-    records.push(
-      newRecord
-    );
+    /*
+      新規登録
+    */
+
+    if (
+      editingRecordId === null
+    ) {
+
+      records.push({
+
+        id:
+          Date.now(),
+
+        ...recordData
+
+      });
+
+    }
+
+
+    /*
+      編集
+    */
+
+    else {
+
+      records =
+        records.map((record) => {
+
+
+          if (
+            record.id === editingRecordId
+          ) {
+
+            return {
+
+              ...record,
+
+              ...recordData
+
+            };
+
+          }
+
+
+          return record;
+
+        });
+
+    }
 
 
     saveRecords();
+
+
+    selectedLetter =
+      "ALL";
 
 
     renderRecords();
@@ -618,28 +1059,102 @@ recordForm.addEventListener(
 
 
 /* =========================
-   DELETE
+   EDIT / DELETE
 ========================= */
 
 recordList.addEventListener(
   "click",
   function(event) {
 
-    const button =
+
+    /*
+      EDIT
+    */
+
+    const editButton =
+      event.target.closest(
+        ".edit-button"
+      );
+
+
+    if (editButton) {
+
+
+      const id =
+        Number(
+          editButton.dataset.id
+        );
+
+
+      const record =
+        records.find(
+          (item) =>
+            item.id === id
+        );
+
+
+      if (record) {
+
+        openEditForm(record);
+
+      }
+
+
+      return;
+
+    }
+
+
+    /*
+      DELETE
+    */
+
+    const deleteButton =
       event.target.closest(
         ".delete-button"
       );
 
 
-    if (!button) {
+    if (!deleteButton) {
+
       return;
+
     }
 
 
     const id =
       Number(
-        button.dataset.id
+        deleteButton.dataset.id
       );
+
+
+    const record =
+      records.find(
+        (item) =>
+          item.id === id
+      );
+
+
+    if (!record) {
+
+      return;
+
+    }
+
+
+    const confirmed =
+      window.confirm(
+
+        `${record.artist} / ${record.album} を削除しますか？`
+
+      );
+
+
+    if (!confirmed) {
+
+      return;
+
+    }
 
 
     records =
@@ -659,23 +1174,103 @@ recordList.addEventListener(
 
 
 /* =========================
-   FILTERS
+   A-Z EVENTS
+========================= */
+
+alphabetNav.addEventListener(
+  "click",
+  function(event) {
+
+
+    const button =
+      event.target.closest(
+        ".alphabet-button"
+      );
+
+
+    if (
+      !button ||
+      button.disabled
+    ) {
+
+      return;
+
+    }
+
+
+    selectedLetter =
+      button.dataset.letter;
+
+
+    renderRecords();
+
+
+    document
+      .querySelector(
+        ".collection-section"
+      )
+      .scrollIntoView({
+        behavior: "smooth"
+      });
+
+  }
+);
+
+
+showAllButton.addEventListener(
+  "click",
+  function() {
+
+    selectedLetter =
+      "ALL";
+
+
+    renderRecords();
+
+  }
+);
+
+
+/* =========================
+   SEARCH
 ========================= */
 
 searchInput.addEventListener(
   "input",
-  renderRecords
+  function() {
+
+    selectedLetter =
+      "ALL";
+
+
+    renderRecords();
+
+  }
 );
 
 
+/* =========================
+   GENRE
+========================= */
+
 genreFilter.addEventListener(
   "change",
-  renderRecords
+  function() {
+
+    selectedLetter =
+      "ALL";
+
+
+    renderRecords();
+
+  }
 );
 
 
 /* =========================
    START
 ========================= */
+
+renderAlphabet();
 
 renderRecords();

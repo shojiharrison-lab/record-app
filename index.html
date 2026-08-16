@@ -37,7 +37,7 @@
 
   <main class="container">
 
-    <!-- SEARCH -->
+    <!-- CONTROLS -->
 
     <section class="top-controls">
 
@@ -48,73 +48,23 @@
       >
 
       <select id="genreFilter">
-        <option value="ALL">
-          ALL GENRES
-        </option>
-
-        <option value="Rock">
-          Rock
-        </option>
-
-        <option value="Alternative">
-          Alternative
-        </option>
-
-        <option value="Indie Rock">
-          Indie Rock
-        </option>
-
-        <option value="Folk">
-          Folk
-        </option>
-
-        <option value="Folk Rock">
-          Folk Rock
-        </option>
-
-        <option value="Punk">
-          Punk
-        </option>
-
-        <option value="Post Punk">
-          Post Punk
-        </option>
-
-        <option value="Emo">
-          Emo
-        </option>
-
-        <option value="Shoegaze">
-          Shoegaze
-        </option>
-
-        <option value="Electronic">
-          Electronic
-        </option>
-
-        <option value="Jazz">
-          Jazz
-        </option>
-
-        <option value="Soul / R&B">
-          Soul / R&B
-        </option>
-
-        <option value="Country">
-          Country
-        </option>
-
-        <option value="Metal">
-          Metal
-        </option>
-
-        <option value="Hip Hop">
-          Hip Hop
-        </option>
-
-        <option value="Other">
-          Other
-        </option>
+        <option value="ALL">ALL GENRES</option>
+        <option value="Rock">Rock</option>
+        <option value="Alternative">Alternative</option>
+        <option value="Indie Rock">Indie Rock</option>
+        <option value="Folk">Folk</option>
+        <option value="Folk Rock">Folk Rock</option>
+        <option value="Punk">Punk</option>
+        <option value="Post Punk">Post Punk</option>
+        <option value="Emo">Emo</option>
+        <option value="Shoegaze">Shoegaze</option>
+        <option value="Electronic">Electronic</option>
+        <option value="Jazz">Jazz</option>
+        <option value="Soul / R&B">Soul / R&B</option>
+        <option value="Country">Country</option>
+        <option value="Metal">Metal</option>
+        <option value="Hip Hop">Hip Hop</option>
+        <option value="Other">Other</option>
       </select>
 
       <button id="openFormButton">
@@ -124,7 +74,40 @@
     </section>
 
 
-    <!-- ADD FORM -->
+    <!-- A-Z -->
+
+    <section class="alphabet-section">
+
+      <div class="alphabet-header">
+
+        <div>
+          <p class="small-label">
+            INDEX
+          </p>
+
+          <h2>
+            ARTISTS A—Z
+          </h2>
+        </div>
+
+        <button
+          id="showAllButton"
+          class="show-all-button"
+        >
+          SHOW ALL
+        </button>
+
+      </div>
+
+      <div
+        id="alphabetNav"
+        class="alphabet-nav"
+      ></div>
+
+    </section>
+
+
+    <!-- FORM -->
 
     <section
       id="recordFormSection"
@@ -135,11 +118,14 @@
 
         <div>
 
-          <p class="small-label">
+          <p
+            id="formModeLabel"
+            class="small-label"
+          >
             NEW ENTRY
           </p>
 
-          <h2>
+          <h2 id="formTitle">
             ADD RECORD
           </h2>
 
@@ -232,12 +218,13 @@
         </label>
 
 
+        <!-- COVER -->
+
         <div class="cover-search">
 
           <div class="cover-search-header">
 
             <div>
-
               <p class="small-label">
                 COVER ART
               </p>
@@ -245,7 +232,6 @@
               <h3>
                 ジャケットを検索
               </h3>
-
             </div>
 
             <button
@@ -257,6 +243,12 @@
             </button>
 
           </div>
+
+
+          <p
+            id="currentCoverText"
+            class="cover-status"
+          ></p>
 
 
           <p
@@ -283,6 +275,7 @@
 
           <button
             type="submit"
+            id="saveButton"
             class="save-button"
           >
             SAVE RECORD
@@ -310,7 +303,6 @@
       <div class="collection-header">
 
         <div>
-
           <p class="small-label">
             COLLECTION
           </p>
@@ -318,7 +310,6 @@
           <h2>
             RECORDS
           </h2>
-
         </div>
 
         <span id="recordCount">
